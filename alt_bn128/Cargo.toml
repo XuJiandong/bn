@@ -10,6 +10,9 @@ repository = "https://github.com/paritytech/bn"
 license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = []
+use_rvv_vector = []
 
 [profile.release]
 lto = "fat"
@@ -18,3 +21,4 @@ lto = "fat"
 byteorder = { version = "1.0", features = ["i128"], default-features = false }
 crunchy = "0.2.1"
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
+uint = { version = "0.9.1" }

@@ -4,6 +4,7 @@ pub mod arith;
 pub mod ethereum;
 mod fields;
 mod groups;
+mod rvv_impl;
 
 use crate::fields::FieldElement;
 use crate::groups::{G1Params, G2Params, GroupElement, GroupParams};
