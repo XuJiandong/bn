@@ -3,8 +3,6 @@ use core::cmp::Ordering;
 use crunchy::unroll;
 
 use byteorder::{BigEndian, ByteOrder};
-extern crate std;
-use std::println;
 
 /// 256-bit, stack allocated biginteger for use in prime field
 /// arithmetic.
@@ -292,22 +290,22 @@ impl U256 {
     /// Multiply `self` by `other` (mod `modulo`) via the Montgomery
     /// multiplication method.
     pub fn mul(&mut self, other: &U256, modulo: &U256, inv: u128) {
-        let mut self_internal = self.clone();
-
-        mul_reduce(&mut self.0, &other.0, &modulo.0, inv);
-        if *self >= *modulo {
-            sub_noborrow(&mut self.0, &modulo.0);
+        // original one
+        if cfg!(feature = "use_rvv_vector") {
+            let inv_high = if inv == 0x9ede7d651eca6ac987d20782e4866389 {
+                0xf57a22b791888c6bd8afcbd01833da80u128
+            } else if inv == 0x6586864b4c6911b3c2e1f593efffffff {
+                0x73f82f1d0d8341b2e39a982899062391
+            } else {
+                0
+            };
+            mul_reduce_internal(&mut self.0, &other.0, &modulo.0, inv, inv_high);
+        } else {
+            mul_reduce(&mut self.0, &other.0, &modulo.0, inv);
+            if *self >= *modulo {
+                sub_noborrow(&mut self.0, &modulo.0);
+            }
         }
-        let inv_high = 0xf57a22b791888c6bd8afcbd01833da80u128;
-        mul_reduce_internal(&mut self_internal.0, &other.0, &modulo.0, inv, inv_high);
-        println!(
-            "self_internal = 0x{:x}, 0x{:x}",
-            self_internal.0[0], self_internal.0[1]
-        );
-        println!("self = 0x{:x}, 0x{:x}", self.0[0], self.0[1]);
-        println!("inv = 0x{:x}", inv);
-        println!("modulo = 0x{:x}, 0x{:x}", modulo.0[0], modulo.0[1]);
-        assert_eq!(&self_internal, self);
     }
 
     /// Turn `self` into its additive inverse (mod `modulo`)
